@@ -1,5 +1,5 @@
 import api from '@forge/api';
-import ForgeUI, { render, Text, IssuePanel, Fragment, Button, ButtonSet, ModalDialog, useProductContext, useState, useAction } from '@forge/ui';
+import ForgeUI, { render, Text, IssuePanel, Fragment, Button, ModalDialog, Table, Head, Row, Cell, Avatar, useProductContext, useState, useAction } from '@forge/ui';
 
 const STORAGE_NAMESPACE = "io_robrose_timetracker"
 
@@ -31,7 +31,7 @@ const undefinedToZero = (val) => {
 const setUserStartTime = async (issueKey, userId) => {
   const setRes = await api.store
     .onJiraIssue(issueKey)
-    .set(`${STORAGE_NAMESPACE}_${userId}_start`, now());
+    .set(`${STORAGE_NAMESPACE}_start_${userId}`, now());
 
   console.info(`Start time setten for ${userId} on ${issueKey}`);
   return setRes;
@@ -40,16 +40,25 @@ const setUserStartTime = async (issueKey, userId) => {
 const fetchUserStartTime = async (issueKey, userId) => {
   const getRes = await api.store
     .onJiraIssue(issueKey)
-    .get(`${STORAGE_NAMESPACE}_${userId}_start`);
+    .get(`${STORAGE_NAMESPACE}_start_${userId}`);
   
   console.info(`Start time gotten for ${userId} on ${issueKey}`);
   return getRes;
 };
 
+const clearUserStartTime = async (issueKey, userId) => {
+  const delRes = await api.store
+    .onJiraIssue(issueKey)
+    .delete(`${STORAGE_NAMESPACE}_start_${userId}`);
+  
+  console.info(`Start time deleten for ${userId} on ${issueKey}`);
+  return delRes;
+}
+
 const setUserEndTime = async (issueKey, userId) => {
   const setRes = await api.store
     .onJiraIssue(issueKey)
-    .set(`${STORAGE_NAMESPACE}_${userId}_end`, now());
+    .set(`${STORAGE_NAMESPACE}_end_${userId}`, now());
   
   console.info(`End time setten for ${userId} on ${issueKey}`);
   return setRes;
@@ -58,28 +67,71 @@ const setUserEndTime = async (issueKey, userId) => {
 const fetchUserEndTime = async (issueKey, userId) => {
   const getRes = await api.store
     .onJiraIssue(issueKey)
-    .get(`${STORAGE_NAMESPACE}_${userId}_end`);
+    .get(`${STORAGE_NAMESPACE}_end_${userId}`);
   
   console.info(`End time gotten for ${userId} on ${issueKey}`);
   return getRes;
+}
+
+const clearUserEndTime = async (issueKey, userId) => {
+  const delRes = await api.store
+    .onJiraIssue(issueKey)
+    .delete(`${STORAGE_NAMESPACE}_end_${userId}`);
+  
+  console.info(`End time deleten for ${userId} on ${issueKey}`);
+  return delRes;
 }
 
 const fetchTotalTime = async (issueKey) => {
   const getRes = await api.store
     .onJiraIssue(issueKey)
     .get(`${STORAGE_NAMESPACE}_time`);
-  
-  console.info(`Total time gotten on ${issueKey}`);
-  return getRes;
+
+  if (getRes === undefined) {
+    console.debug(`${STORAGE_NAMESPACE}_time was undefined on ${issueKey}, will fill zero.`);
+    const setRes = await api.store
+      .onJiraIssue(issueKey)
+      .set(`${STORAGE_NAMESPACE}_time`, 0);
+    return 0;
+  } else {
+    console.info(`Total time gotten on ${issueKey}`);
+    return getRes;
+  }  
+}
+
+const addTotalTime = async (issueKey, time) => {
+  const currTime = await fetchTotalTime(issueKey);
+
+  const setRes = await api.store
+    .onJiraIssue(issueKey)
+    .set(`${STORAGE_NAMESPACE}_time`, time + currTime);
+  return setRes;
 }
 
 const fetchUserTime = async (issueKey, userId) => {
   const getRes = await api.store
     .onJiraIssue(issueKey)
-    .get(`${STORAGE_NAMESPACE}_${userId}_time`);
+    .get(`${STORAGE_NAMESPACE}_time_${userId}`);
   
-  console.info(`Total time gotten for ${userId} on ${issueKey}`);
-  return getRes;
+  if (getRes === undefined) {
+    console.debug(`${STORAGE_NAMESPACE}_time_${userId} was undefined on ${issueKey}, will fill zero.`);
+    const setRes = await api.store
+      .onJiraIssue(issueKey)
+      .set(`${STORAGE_NAMESPACE}_time_${userId}`, 0);
+    return 0;
+  } else {
+    console.info(`Total time gotten for ${userId} on ${issueKey}`);
+    return getRes;
+  }
+}
+
+const addUserTime = async (issueKey, userId, time) => {
+  const currTime = await fetchUserTime(issueKey, userId);
+
+  const setRes = await api.store
+    .onJiraIssue(issueKey)
+    .set(`${STORAGE_NAMESPACE}_time_${userId}`, time + currTime);
+  return setRes;
 }
 
 const fetchUsers = async (issueKey) => {
@@ -113,7 +165,7 @@ const addUserToUsers = async (issueKey, userId) => {
   }
 }
 
-const userStatus = async (issueKey, userId) => {
+const getUserStatus = async (issueKey, userId) => {
   const inUsers = (await fetchUsers(issueKey)).includes(userId);
   if(!inUsers) {
     return "new";
@@ -127,6 +179,8 @@ const userStatus = async (issueKey, userId) => {
         return "working";
       }
     } else {
+      // End time should never exist when a user clicks the button, but if it does, we're in some
+      // sort of pending state.
       return "pending";
     }
   }
@@ -139,7 +193,6 @@ const App = () => {
   
   const [isModalOpen, setModalOpen] = useState(false);
   const [modalText, setModalText] = useState("Something went wrong.");
-  const [isPending, setIsPending] = useState(false);
   const [totTime, updateTotTime] = useAction(
     async (currTime, step) => step ? currTime : undefinedToZero(await fetchTotalTime(issueKey)),
     0
@@ -153,12 +206,12 @@ const App = () => {
       if (step) {
         return currText;
       } else {
-        switch(await userStatus(issueKey, userId)) {
+        switch(await getUserStatus(issueKey, userId)) {
           case "new":
             return "Start Time Tracking";
             break;
           case "pending":
-            setIsPending(true);
+            // This case should never exist, but just in case, we handle it separately.
             return "Resume Time Tracking";
             break;
           case "returning":
@@ -183,9 +236,46 @@ const App = () => {
       <Button 
         text={buttonText}
         onClick={async () => {
+          const status = getUserStatus(issueKey, userId);
+          switch(status) {
+            case "new":
+              addUserToUsers(issueKey, userId);
+              await setUserStartTime(issueKey, userId);
+              break;
+            case "pending":
+            case "returning":
+              await setUserStartTime(issueKey, userId);
+              break;
+            case "working":
+              await setUserEndTime(issueKey, userId);
+              break;
+          }
           updateButtonText(false);
         }}
       />
+      <Table>
+        <Head>
+          <Cell>
+            <Text content="User" />
+          </Cell>
+          <Cell>
+            <Text content="Time" />
+          </Cell>
+        </Head>
+        {
+          fetchUsers(issueKey).then(async (users) => 
+            users.map(async (user) => (
+              <Row>
+                <Cell>
+                  <Avatar accountId={user} />
+                </Cell>
+                <Cell>
+                  <Text>{msToHMS(undefinedToZero(await fetchUserTime(issueKey, user)))}</Text>
+                </Cell>
+              </Row>
+          )))
+        }
+      </Table>
       {isModalOpen && (
         <ModalDialog header="Time Tracker Error" onClose={() => setModalOpen(false)}>
           <Text>{modalText}</Text>

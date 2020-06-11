@@ -1,7 +1,7 @@
 # Forge Time Tracker for Jira
 
-This project contains a Forge app written in Javascript that displays tracks per-user time spent
-working on a Jira issue.
+This project contains a Forge app written in Javascript that displays tracks time spent
+working on a Jira issue, as well as how long each user has spent on it.
 
 See [developer.atlassian.com/platform/forge/](https://developer.atlassian.com/platform/forge) for documentation and tutorials explaining Forge.
 
