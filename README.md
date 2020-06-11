@@ -35,3 +35,13 @@ forge tunnel
 ## Support
 
 See [Get help](https://developer.atlassian.com/platform/forge/get-help/) for how to get help and provide feedback.
+
+
+## License
+
+This code is provided under the Prosperity Public License, which makes it free for non-commercial
+projects and free to try for 30 days for commercial projects. If you wish to use it for a
+commercial project, there's a one-time license fee of $99, paid via License Zero. Eventually this
+Forge app will be available on the Atlassian Marketplace.
+
+![L0](https://licensezero.com/offers/8145cc30-822b-41c3-b0fb-102718787917/badge.svg)
