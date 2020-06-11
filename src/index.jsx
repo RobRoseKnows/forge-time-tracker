@@ -228,6 +228,22 @@ const App = () => {
     },
     "Start Time Tracking"
   );
+  const [usersTime, updateUsersTime] = useAction(
+    async (currUsersTime, step) => {
+      if(step) {
+        return currUsersTime;
+      } else {
+        const users = await fetchUsers(issueKey);
+        users.map(async (val) => {
+          let rObj = {}
+          rObj.user = val;
+          rObj.time = await fetchUserTime(issueKey, val);
+          return rObj
+        })
+      }
+    },
+    []
+  )
 
   return (
     <Fragment>
@@ -262,19 +278,16 @@ const App = () => {
             <Text content="Time" />
           </Cell>
         </Head>
-        {
-          fetchUsers(issueKey).then(async (users) => 
-            users.map(async (user) => (
-              <Row>
-                <Cell>
-                  <Avatar accountId={user} />
-                </Cell>
-                <Cell>
-                  <Text>{msToHMS(undefinedToZero(await fetchUserTime(issueKey, user)))}</Text>
-                </Cell>
-              </Row>
-          )))
-        }
+        {usersTime.map(userTime => (
+          <Row>
+            <Cell>
+              <Avatar accountId={userTime.user} />
+            </Cell>
+            <Cell>
+              <Text content={msToHMS(userTime.time)} />
+            </Cell>
+          </Row>
+        ))}
       </Table>
       {isModalOpen && (
         <ModalDialog header="Time Tracker Error" onClose={() => setModalOpen(false)}>
