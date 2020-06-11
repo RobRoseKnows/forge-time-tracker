@@ -3,6 +3,7 @@ modules:
     - key: time-tracker-app-track-time
       function: main
       title: Forge Time Tracker for Jira
+      description: Forge-based Time Tracking app for Jira.
   function:
     - key: main
       handler: index.run
