@@ -1,11 +1,11 @@
 modules:
-  'jira:issueAction':
-    - key: time-tracker-app-hello-world
+  'jira:issuePanel':
+    - key: time-tracker-app-track-time
       function: main
-      title: time-tracker-app
+      title: Forge Time Tracker for Jira
   function:
     - key: main
       handler: index.run
 app:
   id: 'ari:cloud:ecosystem::app/6ce59a74-9369-4672-ac69-05a75fc856f8'
-  name: time-tracker-app
+  name: Forge Time Tracker for Jira

@@ -1,21 +1,15 @@
-import ForgeUI, { render, Text, IssueAction, ModalDialog, useState } from '@forge/ui';
+import ForgeUI, { render, Text, IssuePanel, Fragment, useState } from '@forge/ui';
 
 const App = () => {
-  const [isOpen, setOpen] = useState(true);
-
-  if (!isOpen) {
-    return null;
-  }
-
   return (
-    <ModalDialog header="Hello" onClose={() => setOpen(false)}>
+    <Fragment>
       <Text>Hello world!</Text>
-    </ModalDialog>
+    </Fragment>
   );
 };
 
 export const run = render(
-  <IssueAction>
+  <IssuePanel>
     <App/>
-  </IssueAction>
+  </IssuePanel>
 );
