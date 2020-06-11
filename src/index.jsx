@@ -20,57 +20,57 @@ const msToHMS = (ms) => {
   return `${hours}:${minutes}:${seconds}`
 }
 
-const setUserStartTime = async (issueId, userId) => {
+const setUserStartTime = async (issueKey, userId) => {
   const setRes = api.store
-    .onJiraIssue(issueId)
+    .onJiraIssue(issueKey)
     .set(`${STORAGE_NAMESPACE}/${userId}/start`, now());
 
-  console.info(`Start time async setten for ${userId} on ${issueId}`);
+  console.info(`Start time async setten for ${userId} on ${issueKey}`);
   return setRes;
 }
 
-const fetchUserStartTime = async (issueId, userId) => {
+const fetchUserStartTime = async (issueKey, userId) => {
   const getRes = await api.store
-    .onJiraIssue(issueId)
+    .onJiraIssue(issueKey)
     .get(`${STORAGE_NAMESPACE}/${userId}/start`);
   
-  console.info(`Start time gotten for ${userId} on ${issueId}`);
+  console.info(`Start time gotten for ${userId} on ${issueKey}`);
   return getRes;
 };
 
-const setUserEndTime = async (issueId, userId) => {
+const setUserEndTime = async (issueKey, userId) => {
   const setRes = api.store
-    .onJiraIssue(issueId)
+    .onJiraIssue(issueKey)
     .set(`${STORAGE_NAMESPACE}/${userId}/end`, now());
   
-  console.info(`End time async setten for ${userId} on ${issueId}`);
+  console.info(`End time async setten for ${userId} on ${issueKey}`);
   return setRes;
 }
 
-const fetchUserEndTime = async (issueId, userId) => {
+const fetchUserEndTime = async (issueKey, userId) => {
   const getRes = await api.store
-    .onJiraIssue(issueId)
+    .onJiraIssue(issueKey)
     .get(`${STORAGE_NAMESPACE}/${userId}/end`);
   
-  console.info(`End time gotten for ${userId} on ${issueId}`);
+  console.info(`End time gotten for ${userId} on ${issueKey}`);
   return getRes;
 }
 
-const fetchTotalTime = async (issueId) => {
+const fetchTotalTime = async (issueKey) => {
   const getRes = await api.store
-    .onJiraIssue(issueId)
+    .onJiraIssue(issueKey)
     .get(`${STORAGE_NAMESPACE}/time`);
   
-  console.info(`Total time gotten for ${issueId}`);
+  console.info(`Total time gotten for ${issueKey}`);
   return getRes;
 }
 
-const fetchUserTime = async (issueId, userId) => {
+const fetchUserTime = async (issueKey, userId) => {
   const getRes = await api.store
-    .onJiraIssue(issueId)
+    .onJiraIssue(issueKey)
     .get(`${STORAGE_NAMESPACE}/${userId}/time`);
   
-  console.info(`Total time gotten for ${userId} on ${issueId}`);
+  console.info(`Total time gotten for ${userId} on ${issueKey}`);
   return getRes;
 }
 
