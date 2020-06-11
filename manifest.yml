@@ -1,0 +1,11 @@
+modules:
+  'jira:issueAction':
+    - key: time-tracker-app-hello-world
+      function: main
+      title: time-tracker-app
+  function:
+    - key: main
+      handler: index.run
+app:
+  id: 'ari:cloud:ecosystem::app/6ce59a74-9369-4672-ac69-05a75fc856f8'
+  name: time-tracker-app
